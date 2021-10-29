@@ -1,13 +1,12 @@
 module Main
 
-open Fable.Core.JsInterop
+open Browser.Dom
 open Elmish
-open Elmish.React
+open Feliz
+open Feliz.UseElmish
+open Fable.Core.JsInterop
 
 importSideEffects "./styles/global.scss"
-
-open Feliz
-open Elmish
 
 type TodoEntry = {
     Id: int
@@ -17,25 +16,46 @@ type TodoEntry = {
 
 type Model = {
     Entries: TodoEntry array
-    NewEntry: string
+    NewEntryDescription: string
 }
 
 type Message =
+| EntryChanged of string
 | AddedEntry
-| RemovedEntry
 
-let init () = ({Entries = [||]; NewEntry = ""}, Cmd.none)
+let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
-let update message (model: Model, cmd: Cmd<'a>) =
+let update message model =
     match message with
+    | EntryChanged description -> 
+        ({ model with NewEntryDescription = description }, Cmd.none)
     | AddedEntry -> (model, Cmd.none)
-    | RemovedEntry -> (model, Cmd.none)
 
-let view model dispatch =
+[<ReactComponent>]
+let view () =
+    let (model, dispatch) = React.useElmish(init, update, [||])
     Html.div [
-        Html.h2 [ prop.text "Hello world" ]
+        Html.h2 [ prop.text "TodoSPA Demo" ]
+
+        Html.div [
+            Html.input [
+                prop.type'.text
+                prop.defaultValue ""
+                prop.onTextChange (EntryChanged >> dispatch)
+            ]
+
+            Html.button [
+                prop.text "+"
+                
+            ]
+        ]
+
+        Html.div [
+
+        ]
     ]
 
-Program.mkSimple init update view
-|> Program.withReactSynchronous "feliz-app"
-|> Program.run
+ReactDOM.render(
+    view(),
+    document.getElementById "feliz-app"
+)
