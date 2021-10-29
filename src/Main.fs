@@ -71,16 +71,18 @@ let View () =
         Html.h2 [ prop.text "TodoSPA Demo" ]
 
         Html.div [
-            Bulma.input.text [
-                prop.placeholder model.NewEntryDescription
-                prop.onTextChange (EntryChanged >> dispatch)
-            ]
+            Bulma.field.div [
+                Bulma.input.text [
+                    prop.placeholder model.NewEntryDescription
+                    prop.onTextChange (fun text -> dispatch (EntryChanged text))
+                ]
 
-            Bulma.button.button [
-                color.isSuccess
-                prop.onClick (fun _ -> dispatch AddedEntry)
-                prop.text "+"
-                
+                Bulma.button.button [
+                    color.isSuccess
+                    prop.onClick (fun _ -> dispatch AddedEntry)
+                    prop.text "+"
+                    
+                ]
             ]
         ]
 
