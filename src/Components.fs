@@ -10,20 +10,22 @@ type TodoEntry = {
 }
 
 type Model = {
-    Entry: TodoEntry
+    Entries: TodoEntry array
+    NewEntry: string
 }
 
 type Message =
 | AddedEntry
 | RemovedEntry
 
-let update (message: Message) (model: Model) =
-    match message with
-    | AddedEntry _ -> ()
-    | RemovedEntry _ -> ()
+let init () = ({Entries = [||]; NewEntry = ""}, Cmd.none)
 
-[<ReactComponent>]
-let view () =
+let update message (model: Model, cmd: Cmd<'a>) =
+    match message with
+    | AddedEntry -> (model, Cmd.none)
+    | RemovedEntry -> (model, Cmd.none)
+
+let view model dispatch =
     Html.div [
         Html.h2 [ prop.text "Hello world" ]
     ]
