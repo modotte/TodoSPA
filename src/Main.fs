@@ -23,7 +23,8 @@ type Model = {
 type Message =
 | EntryChanged of string
 | AddedEntry
-| MarkEntry of Guid * bool
+| MarkedEntry of Guid * bool
+| RemovedEntry of Guid
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
@@ -39,7 +40,7 @@ let update message model =
         }
 
         ({ model with Entries = Array.append [|newEntry|] model.Entries; }, Cmd.none)
-    | MarkEntry (id, isCompleted) ->
+    | MarkedEntry (id, isCompleted) ->
         let updateEntry entry =
             if entry.Id = id then
                 { entry with IsCompleted = not isCompleted }
@@ -47,6 +48,8 @@ let update message model =
                 entry
 
         ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
+    | RemovedEntry id ->
+        ({ model with Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries}, Cmd.none)
 
 [<ReactComponent>]
 let view () =
@@ -83,7 +86,12 @@ let view () =
                             Html.br []
                             Html.button [
                                 prop.text "Mark Complete"
-                                prop.onClick (fun _ -> dispatch (MarkEntry (entry.Id, entry.IsCompleted)))
+                                prop.onClick (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+                            ]
+                            Html.br []
+                            Html.button [
+                                prop.text "Delete"
+                                prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
                             ]
                         ]
                     ])
