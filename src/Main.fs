@@ -23,6 +23,7 @@ type Model = {
 type Message =
 | EntryChanged of string
 | AddedEntry
+| MarkEntryCompleted of Guid
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
@@ -38,6 +39,14 @@ let update message model =
         }
 
         ({ model with Entries = Array.append [|newEntry|] model.Entries; }, Cmd.none)
+    | MarkEntryCompleted id ->
+        let updateEntry entry =
+            if entry.Id = id then
+                { entry with Completed = true }
+            else
+                entry
+
+        ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
 
 [<ReactComponent>]
 let view () =
@@ -62,7 +71,22 @@ let view () =
         Html.div [
             Html.ul (
                 model.Entries
-                |> Array.map (fun entry -> Html.li [ prop.text entry.Description ])
+                |> Array.map (fun entry -> Html.li [ 
+
+                        Html.div [
+                            Html.label [ prop.text entry.Description ]
+                            Html.br []
+                            
+                            match entry.Completed with
+                            | true -> Html.label [ prop.text "Completed" ]
+                            | _ -> Html.label [ prop.text "Not Completed" ]
+                            Html.br []
+                            Html.button [
+                                prop.text "Mark Complete"
+                                prop.onClick (fun _ -> dispatch (MarkEntryCompleted entry.Id))
+                            ]
+                        ]
+                    ])
                 |> Array.toList
             )
         ]
