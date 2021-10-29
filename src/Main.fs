@@ -88,7 +88,6 @@ let View () =
             Html.ul (
                 model.Entries
                 |> Array.map (fun entry -> Html.li [ 
-
                         Html.div [
                             Bulma.field.div [
                                 Checkradio.checkbox [
