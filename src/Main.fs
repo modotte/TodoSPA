@@ -5,11 +5,12 @@ open Elmish
 open Feliz
 open Feliz.UseElmish
 open Fable.Core.JsInterop
+open System
 
 importSideEffects "./styles/global.scss"
 
 type TodoEntry = {
-    Id: int
+    Id: Guid
     Description: string
     Completed: bool
 }
@@ -29,7 +30,14 @@ let update message model =
     match message with
     | EntryChanged description -> 
         ({ model with NewEntryDescription = description }, Cmd.none)
-    | AddedEntry -> (model, Cmd.none)
+    | AddedEntry ->
+        let newEntry = {
+            Id = Guid.NewGuid()
+            Description = model.NewEntryDescription
+            Completed = false
+        }
+
+        ({ model with Entries = Array.append [|newEntry|] model.Entries; }, Cmd.none)
 
 [<ReactComponent>]
 let view () =
@@ -40,18 +48,23 @@ let view () =
         Html.div [
             Html.input [
                 prop.type'.text
-                prop.defaultValue ""
+                prop.defaultValue model.NewEntryDescription
                 prop.onTextChange (EntryChanged >> dispatch)
             ]
 
             Html.button [
                 prop.text "+"
+                prop.onClick (fun _ -> dispatch AddedEntry)
                 
             ]
         ]
 
         Html.div [
-
+            Html.ul (
+                model.Entries
+                |> Array.map (fun entry -> Html.li [ prop.text entry.Description ])
+                |> Array.toList
+            )
         ]
     ]
 
