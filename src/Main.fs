@@ -12,7 +12,7 @@ importSideEffects "./styles/global.scss"
 type TodoEntry = {
     Id: Guid
     Description: string
-    Completed: bool
+    IsCompleted: bool
 }
 
 type Model = {
@@ -23,7 +23,7 @@ type Model = {
 type Message =
 | EntryChanged of string
 | AddedEntry
-| MarkEntryCompleted of Guid
+| MarkEntry of Guid * bool
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
@@ -35,14 +35,14 @@ let update message model =
         let newEntry = {
             Id = Guid.NewGuid()
             Description = model.NewEntryDescription
-            Completed = false
+            IsCompleted = false
         }
 
         ({ model with Entries = Array.append [|newEntry|] model.Entries; }, Cmd.none)
-    | MarkEntryCompleted id ->
+    | MarkEntry (id, isCompleted) ->
         let updateEntry entry =
             if entry.Id = id then
-                { entry with Completed = true }
+                { entry with IsCompleted = not isCompleted }
             else
                 entry
 
@@ -77,13 +77,13 @@ let view () =
                             Html.label [ prop.text entry.Description ]
                             Html.br []
                             
-                            match entry.Completed with
+                            match entry.IsCompleted with
                             | true -> Html.label [ prop.text "Completed" ]
                             | _ -> Html.label [ prop.text "Not Completed" ]
                             Html.br []
                             Html.button [
                                 prop.text "Mark Complete"
-                                prop.onClick (fun _ -> dispatch (MarkEntryCompleted entry.Id))
+                                prop.onClick (fun _ -> dispatch (MarkEntry (entry.Id, entry.IsCompleted)))
                             ]
                         ]
                     ])
