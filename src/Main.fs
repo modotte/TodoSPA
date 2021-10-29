@@ -31,28 +31,36 @@ type Message =
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
-let update message model =
-    match message with
-    | EntryChanged description -> 
-        ({ model with NewEntryDescription = description }, Cmd.none)
-    | AddedEntry ->
+let withEntryChanged description model =
+    ({ model with NewEntryDescription = description }, Cmd.none)
+
+let withAddedEntry model =
         let newEntry = {
             Id = TodoId (Guid.NewGuid())
             Description = model.NewEntryDescription
             IsCompleted = false
         }
 
-        ({ model with Entries = Array.append [|newEntry|] model.Entries; }, Cmd.none)
-    | MarkedEntry (id, isCompleted) ->
-        let updateEntry entry =
-            if entry.Id = id then
-                { entry with IsCompleted = not isCompleted }
-            else
-                entry
+        ({ model with Entries = Array.append [|newEntry|] model.Entries }, Cmd.none)
 
-        ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
-    | RemovedEntry id ->
-        ({ model with Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries}, Cmd.none)
+let withMarkedEntry id isCompleted model =
+    let updateEntry entry =
+        if entry.Id = id then
+            { entry with IsCompleted = not isCompleted }
+        else
+            entry
+
+    ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
+
+let withRemovedEntry id model =
+    ({ model with Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries}, Cmd.none)
+
+let update message model =
+    match message with
+    | EntryChanged description -> withEntryChanged description model
+    | AddedEntry -> withAddedEntry model
+    | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
+    | RemovedEntry id -> withRemovedEntry id model
 
 [<ReactComponent>]
 let View () =
@@ -62,7 +70,7 @@ let View () =
 
         Html.div [
             Bulma.input.text [
-                prop.defaultValue model.NewEntryDescription
+                prop.placeholder model.NewEntryDescription
                 prop.onTextChange (EntryChanged >> dispatch)
             ]
 
@@ -82,7 +90,7 @@ let View () =
                         Html.div [
                             Bulma.field.div [
                                 Checkradio.checkbox [
-                                    prop.id "mycheck"
+                                    prop.id "isCompletedCheckbox"
                                     color.isPrimary
                                     checkradio.isLarge
                                     
@@ -90,7 +98,7 @@ let View () =
                                     prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
                                 ]
                                 Html.label [
-                                    prop.htmlFor "mycheck"
+                                    prop.htmlFor "isCompletedCheckbox"
                                     prop.text entry.Description
                                 ]
                             ]
