@@ -31,6 +31,9 @@ type Message =
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
+let withEntryValidated description model =
+    ()
+
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
 
@@ -73,23 +76,24 @@ let View () =
         Html.div [
             Bulma.field.div [
                 Bulma.input.text [
+                    prop.required true
                     prop.placeholder model.NewEntryDescription
                     prop.onTextChange (fun text -> dispatch (EntryChanged text))
-                ]
+                ]   
+            ]
 
-                Bulma.button.button [
-                    color.isSuccess
-                    prop.onClick (fun _ -> dispatch AddedEntry)
-                    prop.text "+"
-                    
-                ]
+            Bulma.button.button [
+                color.isSuccess
+                prop.onClick (fun _ -> dispatch AddedEntry)
+                prop.text "+"
             ]
         ]
+        
 
         Html.div [
             Html.ul (
                 model.Entries
-                |> Array.map (fun entry -> Html.li [ 
+                |> Array.map (fun entry -> Html.li [
                         Html.div [
                             Bulma.field.div [
                                 Checkradio.checkbox [
