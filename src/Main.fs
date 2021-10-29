@@ -53,7 +53,9 @@ let withMarkedEntry id isCompleted model =
     ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
 
 let withRemovedEntry id model =
-    ({ model with Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries}, Cmd.none)
+    ({ model with
+        Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries},
+     Cmd.none)
 
 let update message model =
     match message with
