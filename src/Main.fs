@@ -4,13 +4,16 @@ open Browser.Dom
 open Elmish
 open Feliz
 open Feliz.UseElmish
+open Feliz.Bulma
 open Fable.Core.JsInterop
 open System
 
 importSideEffects "./styles/global.scss"
 
+type TodoId = TodoId of Guid
+
 type TodoEntry = {
-    Id: Guid
+    Id: TodoId
     Description: string
     IsCompleted: bool
 }
@@ -23,8 +26,8 @@ type Model = {
 type Message =
 | EntryChanged of string
 | AddedEntry
-| MarkedEntry of Guid * bool
-| RemovedEntry of Guid
+| MarkedEntry of TodoId * bool
+| RemovedEntry of TodoId
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
@@ -34,7 +37,7 @@ let update message model =
         ({ model with NewEntryDescription = description }, Cmd.none)
     | AddedEntry ->
         let newEntry = {
-            Id = Guid.NewGuid()
+            Id = TodoId (Guid.NewGuid())
             Description = model.NewEntryDescription
             IsCompleted = false
         }
@@ -52,21 +55,21 @@ let update message model =
         ({ model with Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries}, Cmd.none)
 
 [<ReactComponent>]
-let view () =
+let View () =
     let (model, dispatch) = React.useElmish(init, update, [||])
-    Html.div [
+    Bulma.container [
         Html.h2 [ prop.text "TodoSPA Demo" ]
 
         Html.div [
-            Html.input [
-                prop.type'.text
+            Bulma.input.text [
                 prop.defaultValue model.NewEntryDescription
                 prop.onTextChange (EntryChanged >> dispatch)
             ]
 
-            Html.button [
-                prop.text "+"
+            Bulma.button.button [
+                color.isSuccess
                 prop.onClick (fun _ -> dispatch AddedEntry)
+                prop.text "+"
                 
             ]
         ]
@@ -77,21 +80,23 @@ let view () =
                 |> Array.map (fun entry -> Html.li [ 
 
                         Html.div [
-                            Html.label [ prop.text entry.Description ]
+                            Html.h2 [ prop.text entry.Description ]
                             Html.br []
                             
                             match entry.IsCompleted with
                             | true -> Html.label [ prop.text "Completed" ]
                             | _ -> Html.label [ prop.text "Not Completed" ]
                             Html.br []
-                            Html.button [
-                                prop.text "Mark Complete"
+                            Bulma.button.button [
+                                color.isPrimary
                                 prop.onClick (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+                                prop.text "Mark Complete"
                             ]
                             Html.br []
-                            Html.button [
-                                prop.text "Delete"
+                            Bulma.button.button [
+                                color.isDanger
                                 prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
+                                prop.text "Delete"
                             ]
                         ]
                     ])
@@ -101,6 +106,6 @@ let view () =
     ]
 
 ReactDOM.render(
-    view(),
+    View(),
     document.getElementById "feliz-app"
 )
