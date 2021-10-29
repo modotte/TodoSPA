@@ -80,19 +80,21 @@ let View () =
                 |> Array.map (fun entry -> Html.li [ 
 
                         Html.div [
-                            Html.h2 [ prop.text entry.Description ]
-                            Html.br []
-                            
-                            match entry.IsCompleted with
-                            | true -> Html.label [ prop.text "Completed" ]
-                            | _ -> Html.label [ prop.text "Not Completed" ]
-                            Html.br []
-                            Bulma.button.button [
-                                color.isPrimary
-                                prop.onClick (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
-                                prop.text "Mark Complete"
+                            Bulma.field.div [
+                                Checkradio.checkbox [
+                                    prop.id "mycheck"
+                                    color.isPrimary
+                                    checkradio.isLarge
+                                    
+                                    prop.isChecked entry.IsCompleted
+                                    prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+                                ]
+                                Html.label [
+                                    prop.htmlFor "mycheck"
+                                    prop.text entry.Description
+                                ]
                             ]
-                            Html.br []
+                            
                             Bulma.button.button [
                                 color.isDanger
                                 prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
