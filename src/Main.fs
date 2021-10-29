@@ -35,13 +35,13 @@ let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
 
 let withAddedEntry model =
-        let newEntry = {
-            Id = TodoId (Guid.NewGuid())
-            Description = model.NewEntryDescription
-            IsCompleted = false
-        }
+    let newEntry = {
+        Id = TodoId (Guid.NewGuid())
+        Description = model.NewEntryDescription
+        IsCompleted = false
+    }
 
-        ({ model with Entries = Array.append [|newEntry|] model.Entries }, Cmd.none)
+    ({ model with Entries = Array.append [|newEntry|] model.Entries }, Cmd.none)
 
 let withMarkedEntry id isCompleted model =
     let updateEntry entry =
