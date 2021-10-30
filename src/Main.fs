@@ -67,7 +67,14 @@ let update message model =
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
 
-let makeCheckBoxButton dispatch entry =
+let makeDeleteButton dispatch entry =
+    Bulma.button.button [
+        color.isDanger
+        prop.text "Delete"
+        prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
+    ]
+
+let makeEntryButtons dispatch entry =
     let checkboxId = Guid.NewGuid()
     Bulma.field.div [
         Checkradio.checkbox [
@@ -81,6 +88,8 @@ let makeCheckBoxButton dispatch entry =
         Html.label [ 
             prop.htmlFor (string checkboxId)
             prop.text entry.Description ]
+
+        makeDeleteButton dispatch entry
     ]
 
 [<ReactComponent>]
@@ -109,7 +118,7 @@ let View () =
         Html.div [
             Html.ul (
                 model.Entries
-                |> Array.map (fun entry -> makeCheckBoxButton dispatch entry)
+                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
                 |> Array.toList
             )
         ]
