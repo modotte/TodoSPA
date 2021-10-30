@@ -84,7 +84,7 @@ module Storage =
         |> Option.bind (
             Decode.fromString decoder 
             >> function
-               | Ok x -> Some x
+               | Ok data -> Some data
                | _ -> None)
 
     let save (model: Model) =
@@ -134,14 +134,12 @@ let View () =
         Html.h2 [ prop.text "TodoSPA Demo" ]
 
         Html.div [
-            Bulma.field.div [
-                Bulma.input.text [
-                    prop.required true
-                    prop.placeholder "Add a task"
-                    prop.valueOrDefault model.NewEntryDescription
-                    prop.onTextChange (EntryChanged >> dispatch)
-                ]   
-            ]
+            Bulma.input.text [
+                prop.required true
+                prop.placeholder "Add a task"
+                prop.valueOrDefault model.NewEntryDescription
+                prop.onTextChange (EntryChanged >> dispatch)
+            ]   
 
             Bulma.button.button [
                 color.isSuccess
