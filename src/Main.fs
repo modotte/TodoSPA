@@ -26,28 +26,15 @@ type Model = {
 }
 
 type Message =
+| Failure of string
 | EntryChanged of string
 | AddedEntry
 | MarkedEntry of TodoId * bool
 | RemovedEntry of TodoId
 
-let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
-
-module Storage =
-    let private key = "modotte-todo-spa-elmish"
-    let private decoder = Decode.Auto.generateDecoder<Model>()
-    let load () = 
-        localStorage.getItem(key)
-        |> unbox
-        |> Option.bind (
-            Decode.fromString decoder 
-            >> function
-               | Ok x -> Some x
-               | _ -> None)
-
-    let save (model: Model) =
-        localStorage.setItem(key, Encode.Auto.toString(1, model))
-
+let init = function
+    | Some oldModel -> (oldModel, Cmd.none)
+    | _ -> ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
@@ -82,14 +69,41 @@ let withRemovedEntry id model =
 
 let update message model =
     match message with
+    | Failure error -> printfn "%s" error; (model, Cmd.none)
     | EntryChanged description -> withEntryChanged description model
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
 
+module Storage =
+    let private key = "modotte-todo-spa-elmish"
+    let private decoder = Decode.Auto.generateDecoder<Model>()
+    let load () = 
+        localStorage.getItem(key)
+        |> unbox
+        |> Option.bind (
+            Decode.fromString decoder 
+            >> function
+               | Ok x -> Some x
+               | _ -> None)
+
+    let save (model: Model) =
+        localStorage.setItem(key, Encode.Auto.toString(1, model))
+
+    let updateStorage (message: Message) (model: Model) = 
+        let setStorage (model: Model) =
+            Cmd.OfFunc.attempt save model (string >> Failure)
+        
+        match message with
+        | Failure _ -> (model, Cmd.none)
+        | _ ->
+            let (newModel, commands) = update message model
+            (newModel, Cmd.batch [ setStorage newModel; commands ] )
+
 let makeDeleteButton dispatch entry =
     Bulma.button.button [
         color.isDanger
+        prop.style [ style.marginRight 5]
         prop.text "Delete"
         prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
     ]
@@ -114,7 +128,8 @@ let makeEntryButtons dispatch entry =
 
 [<ReactComponent>]
 let View () =
-    let (model, dispatch) = React.useElmish(init, update, [||])
+    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
+
     Bulma.container [
         Html.h2 [ prop.text "TodoSPA Demo" ]
 
@@ -123,7 +138,7 @@ let View () =
                 Bulma.input.text [
                     prop.required true
                     prop.placeholder model.NewEntryDescription
-                    prop.onTextChange (fun text -> dispatch (EntryChanged text))
+                    prop.onTextChange (EntryChanged >> dispatch)
                 ]   
             ]
 
