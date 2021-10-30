@@ -1,12 +1,14 @@
 module Main
 
+open System
 open Browser.Dom
+open Browser.WebStorage
 open Elmish
 open Feliz
 open Feliz.UseElmish
 open Feliz.Bulma
 open Fable.Core.JsInterop
-open System
+open Thoth.Json
 
 importSideEffects "./styles/global.scss"
 
@@ -30,6 +32,22 @@ type Message =
 | RemovedEntry of TodoId
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
+
+module Storage =
+    let private key = "modotte-todo-spa-elmish"
+    let private decoder = Decode.Auto.generateDecoder<Model>()
+    let load () = 
+        localStorage.getItem(key)
+        |> unbox
+        |> Option.bind (
+            Decode.fromString decoder 
+            >> function
+               | Ok x -> Some x
+               | _ -> None)
+
+    let save (model: Model) =
+        localStorage.setItem(key, Encode.Auto.toString(1, model))
+
 
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)

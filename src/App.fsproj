@@ -14,5 +14,6 @@
         <PackageReference Include="Feliz.Router" Version="3.8.0" />
         <PackageReference Include="Fable.DateFunctions" Version="3.7.0" />
         <PackageReference Include="Feliz.UseElmish" Version="1.5.1" />
+        <PackageReference Include="Thoth.Json" Version="6.0.0" />
     </ItemGroup>
 </Project>
