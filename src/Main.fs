@@ -110,20 +110,22 @@ let makeDeleteButton dispatch entry =
 
 let makeEntryButtons dispatch entry =
     let checkboxId = Guid.NewGuid()
-    Html.li [
-        Checkradio.checkbox [
-            color.isPrimary
-            prop.id (string checkboxId)
-            checkradio.isLarge
-            prop.isChecked entry.IsCompleted
-            prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+    Html.tr [
+        Html.td [
+            Checkradio.checkbox [
+                color.isPrimary
+                prop.id (string checkboxId)
+                checkradio.isLarge
+                prop.isChecked entry.IsCompleted
+                prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+            ]
+            
+            Html.label [ 
+                prop.htmlFor (string checkboxId)
+                prop.text entry.Description ]
         ]
-        
-        Html.label [ 
-            prop.htmlFor (string checkboxId)
-            prop.text entry.Description ]
 
-        makeDeleteButton dispatch entry
+        Html.td (makeDeleteButton dispatch entry)
     ]
 
 [<ReactComponent>]
@@ -149,9 +151,8 @@ let View () =
         ]
         
 
-        Html.div [
-            Html.br []
-            Html.ul (
+        Html.table [
+            Html.tbody (
                 model.Entries
                 |> Array.map (fun entry -> makeEntryButtons dispatch entry)
                 |> Array.toList
