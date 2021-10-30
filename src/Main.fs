@@ -159,37 +159,40 @@ let View () =
                 ]
             ]
 
-            Bulma.tabs [
-                tabs.isCentered
-                prop.children [
-                    Html.ul [
-                        Bulma.tab [
-                            Html.a [
-                                prop.text "Active"
-                                prop.href "#"
+            Bulma.box [
+                Bulma.tabs [
+                    tabs.isCentered
+                    prop.children [
+                        Html.ul [
+                            Bulma.tab [
+                                Html.a [
+                                    prop.text "Active"
+                                    prop.href "#"
+                                ]
                             ]
-                        ]
 
-                        Bulma.tab [
-                            Html.a [ 
-                                prop.text "Archived"
-                                prop.href "#"
+                            Bulma.tab [
+                                Html.a [ 
+                                    prop.text "Archived"
+                                    prop.href "#"
+                                ]
                             ]
                         ]
                     ]
                 ]
-            ]
             
-            Bulma.table [
-                table.isStriped
-                table.isHoverable
-                table.isFullWidth
-                prop.children [
-                    Html.tbody (
-                        model.Entries
-                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                        |> Array.toList
-                    )
+            
+                Bulma.table [
+                    table.isStriped
+                    table.isHoverable
+                    table.isFullWidth
+                    prop.children [
+                        Html.tbody (
+                            model.Entries
+                            |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                            |> Array.toList
+                        )
+                    ]
                 ]
             ]
         ]
