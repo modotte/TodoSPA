@@ -67,6 +67,22 @@ let update message model =
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
 
+let makeCheckBoxButton dispatch entry =
+    let checkboxId = Guid.NewGuid()
+    Bulma.field.div [
+        Checkradio.checkbox [
+            color.isPrimary
+            prop.id (string checkboxId)
+            checkradio.isLarge
+            prop.isChecked entry.IsCompleted
+            prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+        ]
+        
+        Html.label [ 
+            prop.htmlFor (string checkboxId)
+            prop.text entry.Description ]
+    ]
+
 [<ReactComponent>]
 let View () =
     let (model, dispatch) = React.useElmish(init, update, [||])
@@ -93,30 +109,7 @@ let View () =
         Html.div [
             Html.ul (
                 model.Entries
-                |> Array.map (fun entry -> Html.li [
-                        Html.div [
-                            Bulma.field.div [
-                                Checkradio.checkbox [
-                                    prop.id "isCompletedCheckbox"
-                                    color.isPrimary
-                                    checkradio.isLarge
-                                    
-                                    prop.isChecked entry.IsCompleted
-                                    prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
-                                ]
-                                Html.label [
-                                    prop.htmlFor "isCompletedCheckbox"
-                                    prop.text entry.Description
-                                ]
-                            ]
-                            
-                            Bulma.button.button [
-                                color.isDanger
-                                prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
-                                prop.text "Delete"
-                            ]
-                        ]
-                    ])
+                |> Array.map (fun entry -> makeCheckBoxButton dispatch entry)
                 |> Array.toList
             )
         ]
