@@ -137,6 +137,7 @@ let View () =
             Bulma.field.div [
                 Bulma.input.text [
                     prop.required true
+                    prop.placeholder "Add a task"
                     prop.valueOrDefault model.NewEntryDescription
                     prop.onTextChange (EntryChanged >> dispatch)
                 ]   
