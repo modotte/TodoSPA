@@ -51,7 +51,7 @@ let withAddedEntry model =
         | true -> model.Entries
         | _ -> Array.append [|newEntry|] model.Entries
 
-    ({ model with Entries = resultEntries  }, Cmd.none)
+    ({ model with Entries = resultEntries; NewEntryDescription = "" }, Cmd.none)
 
 let withMarkedEntry id isCompleted model =
     let updateEntry entry =
@@ -137,7 +137,7 @@ let View () =
             Bulma.field.div [
                 Bulma.input.text [
                     prop.required true
-                    prop.placeholder model.NewEntryDescription
+                    prop.valueOrDefault model.NewEntryDescription
                     prop.onTextChange (EntryChanged >> dispatch)
                 ]   
             ]
