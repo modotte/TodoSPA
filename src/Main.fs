@@ -136,7 +136,13 @@ let View () =
         container.isFluid
 
         prop.children [
-            Html.h2 [ prop.text "TodoSPA Demo" ]
+            Bulma.title [
+                title.is2
+                prop.text "TodoSPA Demo"
+            ]
+            Bulma.subtitle [
+                prop.text "A demo of Todo application with F#, Elmish and Feliz."
+            ]
 
             Html.div [
                 Bulma.input.text [
