@@ -133,30 +133,59 @@ let View () =
     let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
 
     Bulma.container [
-        Html.h2 [ prop.text "TodoSPA Demo" ]
+        container.isFluid
 
-        Html.div [
-            Bulma.input.text [
-                prop.required true
-                prop.placeholder "Add a task"
-                prop.valueOrDefault model.NewEntryDescription
-                prop.onTextChange (EntryChanged >> dispatch)
-            ]   
+        prop.children [
+            Html.h2 [ prop.text "TodoSPA Demo" ]
 
-            Bulma.button.button [
-                color.isSuccess
-                prop.onClick (fun _ -> dispatch AddedEntry)
-                prop.text "+"
+            Html.div [
+                Bulma.input.text [
+                    prop.required true
+                    prop.placeholder "Add a task"
+                    prop.valueOrDefault model.NewEntryDescription
+                    prop.onTextChange (EntryChanged >> dispatch)
+                ]   
+
+                Bulma.button.button [
+                    color.isSuccess
+                    prop.onClick (fun _ -> dispatch AddedEntry)
+                    prop.text "+"
+                ]
             ]
-        ]
-        
 
-        Html.table [
-            Html.tbody (
-                model.Entries
-                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                |> Array.toList
-            )
+            Bulma.tabs [
+                tabs.isCentered
+                prop.children [
+                    Html.ul [
+                        Bulma.tab [
+                            Html.a [
+                                prop.text "Active"
+                                prop.href "#"
+                            ]
+                        ]
+
+                        Bulma.tab [
+                            Html.a [ 
+                                prop.text "Archived"
+                                prop.href "#"
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            
+            Bulma.table [
+                table.isStriped
+                table.isHoverable
+                table.isFullWidth
+                prop.children [
+                    Html.tbody (
+                        model.Entries
+                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.toList
+                    )
+                ]
+            ]
         ]
     ]
 
