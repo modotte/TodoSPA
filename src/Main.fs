@@ -140,9 +140,6 @@ let View () =
                 title.is2
                 prop.text "TodoSPA Demo"
             ]
-            Bulma.subtitle [
-                prop.text "A demo of Todo application with F#, Elmish and Feliz"
-            ]
 
             Bulma.box [
 
