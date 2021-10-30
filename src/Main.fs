@@ -31,20 +31,22 @@ type Message =
 
 let init () = ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
 
-let withEntryValidated description model =
-    ()
-
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
 
 let withAddedEntry model =
-    let newEntry = {
+    let newEntry =  {
         Id = TodoId (Guid.NewGuid())
         Description = model.NewEntryDescription
         IsCompleted = false
     }
 
-    ({ model with Entries = Array.append [|newEntry|] model.Entries }, Cmd.none)
+    let resultEntries =
+        match String.IsNullOrEmpty model.NewEntryDescription with
+        | true -> model.Entries
+        | _ -> Array.append [|newEntry|] model.Entries
+
+    ({ model with Entries = resultEntries  }, Cmd.none)
 
 let withMarkedEntry id isCompleted model =
     let updateEntry entry =
