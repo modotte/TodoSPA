@@ -186,17 +186,19 @@ let View () =
                     ]
                 ]
             
-            
-                Bulma.table [
-                    table.isStriped
-                    table.isHoverable
-                    table.isFullWidth
-                    prop.children [
-                        Html.tbody (
-                            model.Entries
-                            |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                            |> Array.toList
-                        )
+
+                Bulma.tableContainer [
+                    Bulma.table [
+                        table.isStriped
+                        table.isHoverable
+                        table.isFullWidth
+                        prop.children [
+                            Html.tbody (
+                                model.Entries
+                                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                                |> Array.toList
+                            )
+                        ]
                     ]
                 ]
             ]
