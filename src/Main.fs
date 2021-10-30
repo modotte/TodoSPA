@@ -76,7 +76,7 @@ let makeDeleteButton dispatch entry =
 
 let makeEntryButtons dispatch entry =
     let checkboxId = Guid.NewGuid()
-    Bulma.field.div [
+    Html.li [
         Checkradio.checkbox [
             color.isPrimary
             prop.id (string checkboxId)
@@ -116,6 +116,7 @@ let View () =
         
 
         Html.div [
+            Html.br []
             Html.ul (
                 model.Entries
                 |> Array.map (fun entry -> makeEntryButtons dispatch entry)
