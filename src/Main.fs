@@ -141,25 +141,33 @@ let View () =
                 prop.text "TodoSPA Demo"
             ]
             Bulma.subtitle [
-                prop.text "A demo of Todo application with F#, Elmish and Feliz."
-            ]
-
-            Html.div [
-                Bulma.input.text [
-                    prop.required true
-                    prop.placeholder "Add a task"
-                    prop.valueOrDefault model.NewEntryDescription
-                    prop.onTextChange (EntryChanged >> dispatch)
-                ]   
-
-                Bulma.button.button [
-                    color.isSuccess
-                    prop.onClick (fun _ -> dispatch AddedEntry)
-                    prop.text "+"
-                ]
+                prop.text "A demo of Todo application with F#, Elmish and Feliz"
             ]
 
             Bulma.box [
+
+                Bulma.columns [
+                    columns.isVCentered
+                    prop.children [
+                        Bulma.column [
+                            Bulma.input.text [
+                                prop.required true
+                                prop.placeholder "Add a task"
+                                prop.valueOrDefault model.NewEntryDescription
+                                prop.onTextChange (EntryChanged >> dispatch)
+                            ]
+                        ]
+
+                        Bulma.column [
+                            Bulma.button.button [
+                                color.isSuccess
+                                prop.onClick (fun _ -> dispatch AddedEntry)
+                                prop.text "+"
+                            ]
+                        ]
+                    ]
+                ]
+
                 Bulma.tabs [
                     tabs.isCentered
                     prop.children [
