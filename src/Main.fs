@@ -51,7 +51,7 @@ let withAddedEntry model =
         | true -> model.Entries
         | _ -> Array.append [|newEntry|] model.Entries
 
-    ({ model with Entries = resultEntries  }, Cmd.none)
+    ({ model with Entries = resultEntries; NewEntryDescription = "" }, Cmd.none)
 
 let withMarkedEntry id isCompleted model =
     let updateEntry entry =
@@ -84,7 +84,7 @@ module Storage =
         |> Option.bind (
             Decode.fromString decoder 
             >> function
-               | Ok x -> Some x
+               | Ok data -> Some data
                | _ -> None)
 
     let save (model: Model) =
@@ -110,20 +110,22 @@ let makeDeleteButton dispatch entry =
 
 let makeEntryButtons dispatch entry =
     let checkboxId = Guid.NewGuid()
-    Html.li [
-        Checkradio.checkbox [
-            color.isPrimary
-            prop.id (string checkboxId)
-            checkradio.isLarge
-            prop.isChecked entry.IsCompleted
-            prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+    Html.tr [
+        Html.td [
+            Checkradio.checkbox [
+                color.isPrimary
+                prop.id (string checkboxId)
+                checkradio.isLarge
+                prop.isChecked entry.IsCompleted
+                prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
+            ]
+            
+            Html.label [ 
+                prop.htmlFor (string checkboxId)
+                prop.text entry.Description ]
         ]
-        
-        Html.label [ 
-            prop.htmlFor (string checkboxId)
-            prop.text entry.Description ]
 
-        makeDeleteButton dispatch entry
+        Html.td (makeDeleteButton dispatch entry)
     ]
 
 [<ReactComponent>]
@@ -131,32 +133,73 @@ let View () =
     let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
 
     Bulma.container [
-        Html.h2 [ prop.text "TodoSPA Demo" ]
+        container.isFluid
 
-        Html.div [
-            Bulma.field.div [
-                Bulma.input.text [
-                    prop.required true
-                    prop.placeholder model.NewEntryDescription
-                    prop.onTextChange (EntryChanged >> dispatch)
-                ]   
+        prop.children [
+            Bulma.title [
+                title.is2
+                prop.text "TodoSPA Demo"
             ]
 
-            Bulma.button.button [
-                color.isSuccess
-                prop.onClick (fun _ -> dispatch AddedEntry)
-                prop.text "+"
-            ]
-        ]
-        
+            Bulma.box [
 
-        Html.div [
-            Html.br []
-            Html.ul (
-                model.Entries
-                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                |> Array.toList
-            )
+                Bulma.columns [
+                    columns.isVCentered
+                    prop.children [
+                        Bulma.column [
+                            Bulma.input.text [
+                                prop.required true
+                                prop.placeholder "Add a task"
+                                prop.valueOrDefault model.NewEntryDescription
+                                prop.onTextChange (EntryChanged >> dispatch)
+                            ]
+                        ]
+
+                        Bulma.column [
+                            Bulma.button.button [
+                                color.isSuccess
+                                prop.onClick (fun _ -> dispatch AddedEntry)
+                                prop.text "+"
+                            ]
+                        ]
+                    ]
+                ]
+
+                Bulma.tabs [
+                    tabs.isCentered
+                    prop.children [
+                        Html.ul [
+                            Bulma.tab [
+                                Html.a [
+                                    prop.text "Active"
+                                    prop.href "#"
+                                ]
+                            ]
+
+                            Bulma.tab [
+                                Html.a [ 
+                                    prop.text "Archived"
+                                    prop.href "#"
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            
+            
+                Bulma.table [
+                    table.isStriped
+                    table.isHoverable
+                    table.isFullWidth
+                    prop.children [
+                        Html.tbody (
+                            model.Entries
+                            |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                            |> Array.toList
+                        )
+                    ]
+                ]
+            ]
         ]
     ]
 
