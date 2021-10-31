@@ -131,17 +131,10 @@ let makeEntryButtons dispatch entry =
 
 let styleCenterText = prop.style [ style.textAlign.center ]
 
-let _temp = 
-    Bulma.columns [
-        Bulma.column [
-            column.is1
-        ]
-    ]
-
 let makeEntryInputArea dispatch model =
     Bulma.columns [
-        columns.isCentered
         columns.isMobile
+        columns.isVCentered
         prop.children [
             Bulma.column [
                 column.isHalf
@@ -157,7 +150,7 @@ let makeEntryInputArea dispatch model =
             ]
 
             Bulma.column [
-                column.isHalf
+                column.isOneQuarter
                 prop.children [
                     Bulma.button.button [
                         color.isSuccess
