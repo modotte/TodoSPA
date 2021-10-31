@@ -174,9 +174,12 @@ let View () =
                     prop.children [
                         Html.ul [
                             Bulma.tab [
-                                Html.a [
-                                    prop.text "Active"
-                                    prop.href "#"
+                                tab.isActive
+                                prop.children [
+                                    Html.a [
+                                        prop.text "Active"
+                                        prop.href "#"
+                                    ]
                                 ]
                             ]
 
