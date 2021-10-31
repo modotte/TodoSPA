@@ -5,6 +5,7 @@ open Browser.Dom
 open Browser.WebStorage
 open Elmish
 open Feliz
+open Feliz.Router
 open Feliz.UseElmish
 open Feliz.Bulma
 open Fable.Core.JsInterop
@@ -23,6 +24,7 @@ type TodoEntry = {
 type Model = {
     Entries: TodoEntry array
     NewEntryDescription: string
+    CurrentUrls: string list
 }
 
 type Message =
@@ -31,10 +33,10 @@ type Message =
 | AddedEntry
 | MarkedEntry of TodoId * bool
 | RemovedEntry of TodoId
-
+| UrlChanged of string list
 let init = function
     | Some oldModel -> (oldModel, Cmd.none)
-    | _ -> ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
+    | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
 
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
@@ -67,6 +69,8 @@ let withRemovedEntry id model =
         Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries},
      Cmd.none)
 
+let withUrlChanged segments model = ({model with CurrentUrls = segments }, Cmd.none)
+
 let update message model =
     match message with
     | Failure error -> printfn "%s" error; (model, Cmd.none)
@@ -74,6 +78,7 @@ let update message model =
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
+    | UrlChanged segments -> withUrlChanged segments model
 
 module Storage =
     let private key = "modotte-todo-spa-elmish"
@@ -152,10 +157,33 @@ let makeEntryInputArea dispatch model =
         ]
     ]
 
-[<ReactComponent>]
-let View () =
-    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
+let makeTodosStateTabs =
+    Bulma.tabs [
+        tabs.isCentered
+        prop.children [
+            Html.ul [
+                Bulma.tab [
+                    tab.isActive
+                    prop.children [
+                        Html.a [
+                            prop.text "Active"
+                            prop.href "/#"
+                        ]
+                    ]
+                ]
 
+                Bulma.tab [
+                    Html.a [ 
+                        prop.text "Archived"
+                        prop.href "#"
+                    ]
+                ]
+            ]
+        ]
+    ]
+
+[<ReactComponent>]
+let View dispatch model =
     Bulma.container [
         container.isFullHd
 
@@ -212,7 +240,20 @@ let View () =
         ]
     ]
 
+[<ReactComponent>]
+let Router () =
+    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
+    React.router [
+        router.onUrlChanged (UrlChanged >> dispatch)
+        router.children [
+            match model.CurrentUrls with
+            | [ ] -> View dispatch model
+            | [ "archived" ] -> Html.h1 "Archived"
+            | _ -> Html.h1 "Not found"
+        ]
+    ]
+
 ReactDOM.render(
-    View(),
+    Router(),
     document.getElementById "feliz-app"
 )
