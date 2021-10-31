@@ -5,12 +5,20 @@ open Browser.Dom
 open Browser.WebStorage
 open Elmish
 open Feliz
+open Feliz.Router
 open Feliz.UseElmish
 open Feliz.Bulma
 open Fable.Core.JsInterop
 open Thoth.Json
 
 importSideEffects "./styles/global.scss"
+
+let [<Literal>] ACTIVE_TAB_NAME = "Active"
+let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
+let [<Literal>] ACTIVE_LINK = "#/"
+let [<Literal>] ARCHIVED_LINK = "#/archived"
+
+type TabState = Active | Archived
 
 type TodoId = TodoId of Guid
 
@@ -23,6 +31,7 @@ type TodoEntry = {
 type Model = {
     Entries: TodoEntry array
     NewEntryDescription: string
+    CurrentUrls: string list
 }
 
 type Message =
@@ -31,10 +40,10 @@ type Message =
 | AddedEntry
 | MarkedEntry of TodoId * bool
 | RemovedEntry of TodoId
-
+| UrlChanged of string list
 let init = function
     | Some oldModel -> (oldModel, Cmd.none)
-    | _ -> ({Entries = [||]; NewEntryDescription = ""}, Cmd.none)
+    | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
 
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
@@ -67,6 +76,8 @@ let withRemovedEntry id model =
         Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries},
      Cmd.none)
 
+let withUrlChanged segments model = ({ model with CurrentUrls = segments }, Cmd.none)
+
 let update message model =
     match message with
     | Failure error -> printfn "%s" error; (model, Cmd.none)
@@ -74,6 +85,7 @@ let update message model =
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
+    | UrlChanged segments -> withUrlChanged segments model
 
 module Storage =
     let private key = "modotte-todo-spa-elmish"
@@ -123,13 +135,12 @@ let makeEntryButtons dispatch entry =
             
             Html.label [ 
                 prop.htmlFor (string checkboxId)
-                prop.text entry.Description ]
+                prop.text entry.Description 
+            ]
         ]
 
         Html.td (makeDeleteButton dispatch entry)
     ]
-
-let styleCenterText = prop.style [ style.textAlign.center ]
 
 let makeEntryInputArea dispatch model =
     Bulma.field.div [
@@ -152,64 +163,121 @@ let makeEntryInputArea dispatch model =
         ]
     ]
 
-[<ReactComponent>]
-let View () =
-    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
-
-    Bulma.container [
-        container.isFullHd
-
-        prop.children [
-            Bulma.box [
-                Bulma.title [
-                    styleCenterText
-                    title.is2
-                    prop.text "TodoSPA Demo"
-                ]
-
-                makeEntryInputArea dispatch model
-
-                Bulma.tabs [
-                    tabs.isCentered
-                    prop.children [
-                        Html.ul [
-                            Bulma.tab [
-                                Html.a [
-                                    prop.text "Active"
-                                    prop.href "#"
-                                ]
-                            ]
-
-                            Bulma.tab [
-                                Html.a [ 
-                                    prop.text "Archived"
-                                    prop.href "#"
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            
-
-                Bulma.tableContainer [
-                    Bulma.table [
-                        table.isStriped
-                        table.isHoverable
-                        table.isFullWidth
-                        prop.children [
-                            Html.tbody (
-                                model.Entries
-                                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                                |> Array.toList
-                            )
-                        ]
-                    ]
+let makeTodosStateTabs model =
+    let makeTab isActive (name: string) link =
+        Bulma.tab [
+            match isActive with
+            | true -> tab.isActive
+            | false -> ()
+            prop.children [
+                Html.a [
+                    prop.text name
+                    prop.href link
                 ]
             ]
+        ]
+    
+    Bulma.tabs [
+        tabs.isCentered
+        prop.children [
+            match model.CurrentUrls with
+            | [ ] -> 
+                Html.ul [ 
+                    makeTab true ACTIVE_TAB_NAME ACTIVE_LINK
+                    makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                ]
+            | [ "archived" ] -> 
+                Html.ul [ 
+                    makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
+                    makeTab true ARCHIVED_TAB_NAME ARCHIVED_LINK
+                ]
+            | _ -> 
+                Html.h1 [ 
+                    prop.style [ style.textAlign.center ]
+                    prop.text"Tabs broken"
+                ]
+        ]
+    ]
+
+
+let rootContainer children = 
+    Bulma.container [
+        container.isFluid
+
+        prop.children [ 
+            children
+        ]
+    ]
+
+let headerComponent dispatch model = 
+    Html.div [
+        Bulma.title [
+            prop.style [ style.textAlign.center ]
+            title.is2
+            prop.text "TodoSPA Demo"
+        ]
+
+        makeEntryInputArea dispatch model
+        makeTodosStateTabs model
+    ]
+
+let ActiveView dispatch model =
+    Bulma.box [
+        headerComponent dispatch model
+
+        Bulma.tableContainer [
+            Bulma.table [
+                table.isStriped
+                table.isHoverable
+                table.isFullWidth
+                prop.children [
+                    Html.tbody (
+                        model.Entries
+                        // TODO: Clarify reverse boolean?
+                        |> Array.filter (fun entry -> not entry.IsCompleted)
+                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.toList
+                    )
+                ]
+            ]
+        ]
+    ] |> rootContainer
+
+let ArchivedView dispatch model =
+    Bulma.box [
+        headerComponent dispatch model
+
+        Bulma.tableContainer [
+            Bulma.table [
+                table.isStriped
+                table.isHoverable
+                table.isFullWidth
+                prop.children [
+                    Html.tbody (
+                        model.Entries
+                        |> Array.filter (fun entry -> entry.IsCompleted)
+                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.toList
+                    )
+                ]
+            ]
+        ]
+    ] |> rootContainer
+
+[<ReactComponent>]
+let Router () =
+    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
+    React.router [
+        router.onUrlChanged (UrlChanged >> dispatch)
+        router.children [
+            match model.CurrentUrls with
+            | [ ] -> ActiveView dispatch model
+            | [ "archived" ] -> ArchivedView dispatch model
+            | _ -> Html.h1 "Not found"
         ]
     ]
 
 ReactDOM.render(
-    View(),
+    Router(),
     document.getElementById "feliz-app"
 )
