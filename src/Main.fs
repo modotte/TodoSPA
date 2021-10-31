@@ -18,6 +18,8 @@ let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
 let [<Literal>] ACTIVE_LINK = "#/"
 let [<Literal>] ARCHIVED_LINK = "#/archived"
 
+type TabState = Active | Archived
+
 type TodoId = TodoId of Guid
 
 type TodoEntry = {
@@ -231,6 +233,8 @@ let ActiveView dispatch model =
                 prop.children [
                     Html.tbody (
                         model.Entries
+                        // TODO: Clarify reverse boolean?
+                        |> Array.filter (fun entry -> not entry.IsCompleted)
                         |> Array.map (fun entry -> makeEntryButtons dispatch entry)
                         |> Array.toList
                     )
@@ -251,6 +255,7 @@ let ArchivedView dispatch model =
                 prop.children [
                     Html.tbody (
                         model.Entries
+                        |> Array.filter (fun entry -> entry.IsCompleted)
                         |> Array.map (fun entry -> makeEntryButtons dispatch entry)
                         |> Array.toList
                     )
