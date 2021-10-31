@@ -13,6 +13,11 @@ open Thoth.Json
 
 importSideEffects "./styles/global.scss"
 
+let [<Literal>] ACTIVE_TAB_NAME = "Active"
+let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
+let [<Literal>] ACTIVE_LINK = "#/"
+let [<Literal>] ARCHIVED_LINK = "#/archived"
+
 type TodoId = TodoId of Guid
 
 type TodoEntry = {
@@ -170,21 +175,19 @@ let makeTodosStateTabs model =
             ]
         ]
     
-    let activeLink = "#/"
-    let archivedLink = "#/archived"
     Bulma.tabs [
         tabs.isCentered
         prop.children [
             match model.CurrentUrls with
             | [ ] -> 
                 Html.ul [ 
-                    makeTab true "Active" activeLink
-                    makeTab false "Archived" archivedLink 
+                    makeTab true ACTIVE_TAB_NAME ACTIVE_LINK
+                    makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
                 ]
             | [ "archived" ] -> 
                 Html.ul [ 
-                    makeTab false "Active" activeLink
-                    makeTab true "Archived" archivedLink 
+                    makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
+                    makeTab true ARCHIVED_TAB_NAME ARCHIVED_LINK
                 ]
             | _ -> 
                 Html.h1 [ 
