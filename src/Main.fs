@@ -131,26 +131,39 @@ let makeEntryButtons dispatch entry =
 
 let styleCenterText = prop.style [ style.textAlign.center ]
 
-let makeInputArea dispatch model =
+let _temp = 
+    Bulma.columns [
+        Bulma.column [
+            column.is1
+        ]
+    ]
+
+let makeEntryInputArea dispatch model =
     Bulma.columns [
         columns.isCentered
         columns.isMobile
         prop.children [
             Bulma.column [
-                Bulma.input.text [
-                    input.isRounded
-                    prop.required true
-                    prop.placeholder "Add a task"
-                    prop.valueOrDefault model.NewEntryDescription
-                    prop.onTextChange (EntryChanged >> dispatch)
+                column.isHalf
+                prop.children [
+                    Bulma.input.text [
+                        input.isRounded
+                        prop.required true
+                        prop.placeholder "Add a task"
+                        prop.valueOrDefault model.NewEntryDescription
+                        prop.onTextChange (EntryChanged >> dispatch)
+                    ]
                 ]
             ]
 
             Bulma.column [
-                Bulma.button.button [
-                    color.isSuccess
-                    prop.onClick (fun _ -> dispatch AddedEntry)
-                    prop.text "+"
+                column.isHalf
+                prop.children [
+                    Bulma.button.button [
+                        color.isSuccess
+                        prop.onClick (fun _ -> dispatch AddedEntry)
+                        prop.text "+"
+                    ]
                 ]
             ]
         ]
@@ -161,7 +174,7 @@ let View () =
     let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
 
     Bulma.container [
-        container.isFluid
+        container.isFullHd
 
         prop.children [
             Bulma.box [
@@ -171,7 +184,7 @@ let View () =
                     prop.text "TodoSPA Demo"
                 ]
 
-                makeInputArea dispatch model
+                makeEntryInputArea dispatch model
 
                 Bulma.tabs [
                     tabs.isCentered
