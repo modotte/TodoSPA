@@ -134,8 +134,6 @@ let makeEntryButtons dispatch entry =
         Html.td (makeDeleteButton dispatch entry)
     ]
 
-let styleCenterText = prop.style [ style.textAlign.center ]
-
 let makeEntryInputArea dispatch model =
     Bulma.field.div [
         field.isGrouped
@@ -190,7 +188,6 @@ let View dispatch model =
         prop.children [
             Bulma.box [
                 Bulma.title [
-                    styleCenterText
                     title.is2
                     prop.text "TodoSPA Demo"
                 ]
