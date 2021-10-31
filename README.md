@@ -48,6 +48,11 @@ To run the tests using the command line and of course in your CI server, you hav
 npm test
 ```
 
+## Contributing
+
+Please read [CONTRIBUTING.md](https://github.com/modotte/TodoSPA/blob/main/CONTRIBUTING.MD) first.
+
+Thank you for contributing! :smile:
 ## License
 
 This software is released under the MIT license. For more details, please see LICENSE file.
