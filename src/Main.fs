@@ -132,32 +132,22 @@ let makeEntryButtons dispatch entry =
 let styleCenterText = prop.style [ style.textAlign.center ]
 
 let makeEntryInputArea dispatch model =
-    Bulma.columns [
-        columns.isMobile
-        columns.isVCentered
-        prop.children [
-            Bulma.column [
-                column.isHalf
-                prop.children [
-                    Bulma.input.text [
-                        input.isRounded
-                        prop.required true
-                        prop.placeholder "Add a task"
-                        prop.valueOrDefault model.NewEntryDescription
-                        prop.onTextChange (EntryChanged >> dispatch)
-                    ]
-                ]
-            ]
+    Bulma.field.div [
+        field.isGrouped
+        field.isGroupedCentered
 
-            Bulma.column [
-                column.isOneQuarter
-                prop.children [
-                    Bulma.button.button [
-                        color.isSuccess
-                        prop.onClick (fun _ -> dispatch AddedEntry)
-                        prop.text "+"
-                    ]
-                ]
+        prop.children [        
+            Bulma.input.text [
+                prop.required true
+                prop.placeholder "Add a task"
+                prop.valueOrDefault model.NewEntryDescription
+                prop.onTextChange (EntryChanged >> dispatch)
+            ]
+            
+            Bulma.button.button [
+                color.isSuccess
+                prop.onClick (fun _ -> dispatch AddedEntry)
+                prop.text "+"
             ]
         ]
     ]
