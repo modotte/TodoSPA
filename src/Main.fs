@@ -69,7 +69,7 @@ let withRemovedEntry id model =
         Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries},
      Cmd.none)
 
-let withUrlChanged segments model = ({model with CurrentUrls = segments }, Cmd.none)
+let withUrlChanged segments model = ({ model with CurrentUrls = segments }, Cmd.none)
 
 let update message model =
     match message with
@@ -165,7 +165,7 @@ let makeTodosStateTabs =
                     prop.children [
                         Html.a [
                             prop.text "Active"
-                            prop.href "/#"
+                            prop.href "#/"
                         ]
                     ]
                 ]
@@ -173,70 +173,74 @@ let makeTodosStateTabs =
                 Bulma.tab [
                     Html.a [ 
                         prop.text "Archived"
-                        prop.href "#"
+                        prop.href "#/archived"
                     ]
                 ]
             ]
         ]
     ]
 
-[<ReactComponent>]
-let View dispatch model =
+
+let rootContainer children = 
     Bulma.container [
-        container.isFullHd
+        container.isFluid
 
-        prop.children [
-            Bulma.box [
-                Bulma.title [
-                    prop.style [ style.textAlign.center ]
-                    title.is2
-                    prop.text "TodoSPA Demo"
-                ]
+        prop.children [ 
+            children
+        ]
+    ]
 
-                makeEntryInputArea dispatch model
+let headerComponent dispatch model = 
+    Html.div [
+        Bulma.title [
+            prop.style [ style.textAlign.center ]
+            title.is2
+            prop.text "TodoSPA Demo"
+        ]
 
-                Bulma.tabs [
-                    tabs.isCentered
-                    prop.children [
-                        Html.ul [
-                            Bulma.tab [
-                                tab.isActive
-                                prop.children [
-                                    Html.a [
-                                        prop.text "Active"
-                                        prop.href "#"
-                                    ]
-                                ]
-                            ]
+        makeEntryInputArea dispatch model
+        makeTodosStateTabs
+    ]
 
-                            Bulma.tab [
-                                Html.a [ 
-                                    prop.text "Archived"
-                                    prop.href "#"
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            
+let ActiveView dispatch model =
+    Bulma.box [
+        headerComponent dispatch model
 
-                Bulma.tableContainer [
-                    Bulma.table [
-                        table.isStriped
-                        table.isHoverable
-                        table.isFullWidth
-                        prop.children [
-                            Html.tbody (
-                                model.Entries
-                                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                                |> Array.toList
-                            )
-                        ]
-                    ]
+        Bulma.tableContainer [
+            Bulma.table [
+                table.isStriped
+                table.isHoverable
+                table.isFullWidth
+                prop.children [
+                    Html.tbody (
+                        model.Entries
+                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.toList
+                    )
                 ]
             ]
         ]
-    ]
+    ] |> rootContainer
+
+let ArchivedView dispatch model =
+    Bulma.box [
+        headerComponent dispatch model
+
+        Bulma.tableContainer [
+            Bulma.table [
+                table.isStriped
+                table.isHoverable
+                table.isFullWidth
+                prop.children [
+                    Html.tbody (
+                        model.Entries
+                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.toList
+                    )
+                ]
+            ]
+        ]
+    ] |> rootContainer
 
 [<ReactComponent>]
 let Router () =
@@ -245,8 +249,8 @@ let Router () =
         router.onUrlChanged (UrlChanged >> dispatch)
         router.children [
             match model.CurrentUrls with
-            | [ ] -> View dispatch model
-            | [ "archived" ] -> Html.h1 "Archived"
+            | [ ] -> ActiveView dispatch model
+            | [ "archived" ] -> ArchivedView dispatch model
             | _ -> Html.h1 "Not found"
         ]
     ]
