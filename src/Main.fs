@@ -128,7 +128,8 @@ let makeEntryButtons dispatch entry =
             
             Html.label [ 
                 prop.htmlFor (string checkboxId)
-                prop.text entry.Description ]
+                prop.text entry.Description 
+            ]
         ]
 
         Html.td (makeDeleteButton dispatch entry)
@@ -155,28 +156,41 @@ let makeEntryInputArea dispatch model =
         ]
     ]
 
-let makeTodosStateTabs =
+let makeTodosStateTabs model =
+    let makeTab isActive (name: string) link =
+        Bulma.tab [
+            match isActive with
+            | true -> tab.isActive
+            | false -> ()
+            prop.children [
+                Html.a [
+                    prop.text name
+                    prop.href link
+                ]
+            ]
+        ]
+    
+    let activeLink = "#/"
+    let archivedLink = "#/archived"
     Bulma.tabs [
         tabs.isCentered
         prop.children [
-            Html.ul [
-                Bulma.tab [
-                    tab.isActive
-                    prop.children [
-                        Html.a [
-                            prop.text "Active"
-                            prop.href "#/"
-                        ]
-                    ]
+            match model.CurrentUrls with
+            | [ ] -> 
+                Html.ul [ 
+                    makeTab true "Active" activeLink
+                    makeTab false "Archived" archivedLink 
                 ]
-
-                Bulma.tab [
-                    Html.a [ 
-                        prop.text "Archived"
-                        prop.href "#/archived"
-                    ]
+            | [ "archived" ] -> 
+                Html.ul [ 
+                    makeTab false "Active" activeLink
+                    makeTab true "Archived" archivedLink 
                 ]
-            ]
+            | _ -> 
+                Html.h1 [ 
+                    prop.style [ style.textAlign.center ]
+                    prop.text"Tabs broken"
+                ]
         ]
     ]
 
@@ -199,7 +213,7 @@ let headerComponent dispatch model =
         ]
 
         makeEntryInputArea dispatch model
-        makeTodosStateTabs
+        makeTodosStateTabs model
     ]
 
 let ActiveView dispatch model =
