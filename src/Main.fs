@@ -18,8 +18,6 @@ let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
 let [<Literal>] ACTIVE_LINK = "#/"
 let [<Literal>] ARCHIVED_LINK = "#/archived"
 
-type TabState = Active | Archived
-
 type TodoId = TodoId of Guid
 
 type TodoEntry = {
