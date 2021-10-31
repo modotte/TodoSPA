@@ -116,6 +116,7 @@ let makeEntryButtons dispatch entry =
                 color.isPrimary
                 prop.id (string checkboxId)
                 checkradio.isLarge
+                checkradio.isCircle
                 prop.isChecked entry.IsCompleted
                 prop.onCheckedChange (fun _ -> dispatch (MarkedEntry (entry.Id, entry.IsCompleted)))
             ]
@@ -128,42 +129,45 @@ let makeEntryButtons dispatch entry =
         Html.td (makeDeleteButton dispatch entry)
     ]
 
+let styleCenterText = prop.style [ style.textAlign.center ]
+
+let makeEntryInputArea dispatch model =
+    Bulma.field.div [
+        field.isGrouped
+        field.isGroupedCentered
+
+        prop.children [        
+            Bulma.input.text [
+                prop.required true
+                prop.placeholder "Add a task"
+                prop.valueOrDefault model.NewEntryDescription
+                prop.onTextChange (EntryChanged >> dispatch)
+            ]
+            
+            Bulma.button.button [
+                color.isSuccess
+                prop.onClick (fun _ -> dispatch AddedEntry)
+                prop.text "+"
+            ]
+        ]
+    ]
+
 [<ReactComponent>]
 let View () =
     let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
 
     Bulma.container [
-        container.isFluid
+        container.isFullHd
 
         prop.children [
-            Bulma.title [
-                title.is2
-                prop.text "TodoSPA Demo"
-            ]
-
             Bulma.box [
-
-                Bulma.columns [
-                    columns.isVCentered
-                    prop.children [
-                        Bulma.column [
-                            Bulma.input.text [
-                                prop.required true
-                                prop.placeholder "Add a task"
-                                prop.valueOrDefault model.NewEntryDescription
-                                prop.onTextChange (EntryChanged >> dispatch)
-                            ]
-                        ]
-
-                        Bulma.column [
-                            Bulma.button.button [
-                                color.isSuccess
-                                prop.onClick (fun _ -> dispatch AddedEntry)
-                                prop.text "+"
-                            ]
-                        ]
-                    ]
+                Bulma.title [
+                    styleCenterText
+                    title.is2
+                    prop.text "TodoSPA Demo"
                 ]
+
+                makeEntryInputArea dispatch model
 
                 Bulma.tabs [
                     tabs.isCentered
@@ -186,17 +190,19 @@ let View () =
                     ]
                 ]
             
-            
-                Bulma.table [
-                    table.isStriped
-                    table.isHoverable
-                    table.isFullWidth
-                    prop.children [
-                        Html.tbody (
-                            model.Entries
-                            |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                            |> Array.toList
-                        )
+
+                Bulma.tableContainer [
+                    Bulma.table [
+                        table.isStriped
+                        table.isHoverable
+                        table.isFullWidth
+                        prop.children [
+                            Html.tbody (
+                                model.Entries
+                                |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                                |> Array.toList
+                            )
+                        ]
                     ]
                 ]
             ]
