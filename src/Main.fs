@@ -188,6 +188,7 @@ let View dispatch model =
         prop.children [
             Bulma.box [
                 Bulma.title [
+                    prop.style [ style.textAlign.center ]
                     title.is2
                     prop.text "TodoSPA Demo"
                 ]
