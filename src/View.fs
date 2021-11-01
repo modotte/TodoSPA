@@ -26,7 +26,7 @@ module View =
             prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
         ]
 
-    let makeEntryButtons dispatch entry =
+    let makeEntryTableRow dispatch entry =
         let checkboxId = Guid.NewGuid()
         Html.tr [
             Html.td [
@@ -156,7 +156,7 @@ module View =
                 prop.children [
                     Html.tbody (
                         entries
-                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.map (fun entry -> makeEntryTableRow dispatch entry)
                         |> Array.toList
                     )
                 ]
