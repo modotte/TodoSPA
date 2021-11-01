@@ -13,15 +13,8 @@ module View =
 
     type TabUrl = TabUrl of string
     type TabInfo = { IsActive: bool; Name: string; Url: TabUrl }
-    
-    let [<Literal>] ALL_TAB_NAME = "All"
-    let [<Literal>] ACTIVE_TAB_NAME = "Active"
-    let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
-    let [<Literal>] ALL_LINK = "#/"
-    let [<Literal>] ACTIVE_LINK = "#/active"
-    let [<Literal>] ARCHIVED_LINK = "#/archived"
 
-    let AllTab = { IsActive = false; Name = "All"; Url = TabUrl "#/"}
+    let AllTab = { IsActive = false; Name = "All"; Url = TabUrl "#/" }
     let ActiveTab = { IsActive = false; Name = "Active"; Url = TabUrl "#/active" }
     let ArchivedTab = { IsActive = false; Name = "Archived"; Url = TabUrl "#/archived" }
     
@@ -124,12 +117,26 @@ module View =
             ]
         ]
 
+    let githubForkMeRibbon =
+        Html.a [
+            prop.href "https://github.com/modotte/TodoSPA"
+            prop.children [
+                Html.img [
+                    prop.classes [ "attachment-full"; "size-full" ]
+                    prop.alt "Fork me on Github"
+                    prop.src "https://github.blog/wp-content/uploads/2008/12/forkme_left_green_007200.png?resize=149%2C149"
+                ]
+            ]
+        ]
 
     let rootContainer children = 
         Bulma.container [
             container.isFluid
 
-            prop.children [ children ]
+            prop.children [
+                githubForkMeRibbon
+                children 
+            ]
         ]
 
     let headerComponent dispatch model = 
@@ -171,7 +178,6 @@ module View =
                 ]
             ]
         ]
-
 
     let AllView dispatch model =
         Bulma.box [
