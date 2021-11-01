@@ -219,47 +219,38 @@ let headerComponent dispatch model =
         makeTodosStateTabs model
     ]
 
+let showEntries dispatch entries =
+    Bulma.tableContainer [
+        Bulma.table [
+            table.isStriped
+            table.isHoverable
+            table.isFullWidth
+            prop.children [
+                Html.tbody (
+                    entries
+                    |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                    |> Array.toList
+                )
+            ]
+        ]
+    ]
+
 let ActiveView dispatch model =
     Bulma.box [
         headerComponent dispatch model
-
-        Bulma.tableContainer [
-            Bulma.table [
-                table.isStriped
-                table.isHoverable
-                table.isFullWidth
-                prop.children [
-                    Html.tbody (
-                        model.Entries
-                        // TODO: Clarify reverse boolean?
-                        |> Array.filter (fun entry -> not entry.IsCompleted)
-                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                        |> Array.toList
-                    )
-                ]
-            ]
-        ]
+        showEntries dispatch (
+            model.Entries
+            |> Array.filter (fun entry -> not entry.IsCompleted)
+        )
     ] |> rootContainer
 
 let ArchivedView dispatch model =
     Bulma.box [
         headerComponent dispatch model
-
-        Bulma.tableContainer [
-            Bulma.table [
-                table.isStriped
-                table.isHoverable
-                table.isFullWidth
-                prop.children [
-                    Html.tbody (
-                        model.Entries
-                        |> Array.filter (fun entry -> entry.IsCompleted)
-                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
-                        |> Array.toList
-                    )
-                ]
-            ]
-        ]
+        showEntries dispatch (
+            model.Entries
+            |> Array.filter (fun entry -> entry.IsCompleted)
+        )
     ] |> rootContainer
 
 [<ReactComponent>]
