@@ -50,7 +50,7 @@ npm test
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://github.com/modotte/TodoSPA/blob/main/CONTRIBUTING.MD) first.
+Please read [CONTRIBUTING.md](https://github.com/modotte/TodoSPA/blob/main/CONTRIBUTING.md) first.
 
 Thank you for contributing! :smile:
 ## License
