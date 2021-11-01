@@ -5,6 +5,9 @@
     <ItemGroup>
         <None Include="index.html" />
         <Compile Include="Extensions.fs" />
+        <Compile Include="DomainModel.fs" />
+        <Compile Include="Storage.fs" />
+        <Compile Include="View.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
