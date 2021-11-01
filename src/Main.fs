@@ -13,9 +13,11 @@ open Thoth.Json
 
 importSideEffects "./styles/global.scss"
 
+let [<Literal>] ALL_TAB_NAME = "All"
 let [<Literal>] ACTIVE_TAB_NAME = "Active"
 let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
-let [<Literal>] ACTIVE_LINK = "#/"
+let [<Literal>] ALL_LINK = "#/"
+let [<Literal>] ACTIVE_LINK = "#/active"
 let [<Literal>] ARCHIVED_LINK = "#/archived"
 
 type TodoId = TodoId of Guid
@@ -39,6 +41,7 @@ type Message =
 | MarkedEntry of TodoId * bool
 | RemovedEntry of TodoId
 | UrlChanged of string list
+
 let init = function
     | Some oldModel -> (oldModel, Cmd.none)
     | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
@@ -179,13 +182,21 @@ let makeTodosStateTabs model =
         tabs.isCentered
         prop.children [
             match model.CurrentUrls with
-            | [ ] -> 
+            | [] ->
+                Html.ul [
+                    makeTab true ALL_TAB_NAME ALL_LINK
+                    makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
+                    makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                ]
+            | [ "active" ] -> 
                 Html.ul [ 
+                    makeTab false ALL_TAB_NAME ALL_LINK
                     makeTab true ACTIVE_TAB_NAME ACTIVE_LINK
                     makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
                 ]
             | [ "archived" ] -> 
                 Html.ul [ 
+                    makeTab false ALL_TAB_NAME ALL_LINK
                     makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
                     makeTab true ARCHIVED_TAB_NAME ARCHIVED_LINK
                 ]
@@ -202,9 +213,7 @@ let rootContainer children =
     Bulma.container [
         container.isFluid
 
-        prop.children [ 
-            children
-        ]
+        prop.children [ children ]
     ]
 
 let headerComponent dispatch model = 
@@ -235,11 +244,19 @@ let showEntries dispatch entries =
         ]
     ]
 
+
+let AllView dispatch model =
+    Bulma.box [
+        headerComponent dispatch model
+        showEntries dispatch model.Entries
+    ] |> rootContainer
+
 let ActiveView dispatch model =
     Bulma.box [
         headerComponent dispatch model
         showEntries dispatch (
             model.Entries
+            // TODO: Clarify reverse boolean?
             |> Array.filter (fun entry -> not entry.IsCompleted)
         )
     ] |> rootContainer
@@ -260,7 +277,8 @@ let Router () =
         router.onUrlChanged (UrlChanged >> dispatch)
         router.children [
             match model.CurrentUrls with
-            | [ ] -> ActiveView dispatch model
+            | [] -> AllView dispatch model
+            | [ "active" ] -> ActiveView dispatch model
             | [ "archived" ] -> ArchivedView dispatch model
             | _ -> Html.h1 "Not found"
         ]
