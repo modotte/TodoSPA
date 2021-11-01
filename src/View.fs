@@ -11,12 +11,13 @@ open DomainModel
 module View =
     importSideEffects "./styles/global.scss"
 
-    let [<Literal>] ALL_TAB_NAME = "All"
-    let [<Literal>] ACTIVE_TAB_NAME = "Active"
-    let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
-    let [<Literal>] ALL_LINK = "#/"
-    let [<Literal>] ACTIVE_LINK = "#/active"
-    let [<Literal>] ARCHIVED_LINK = "#/archived"
+    type TabUrl = TabUrl of string
+    type TabInfo = { IsActive: bool; Name: string; Url: TabUrl }
+
+    let AllTab = { IsActive = false; Name = "All"; Url = TabUrl "#/" }
+    let ActiveTab = { IsActive = false; Name = "Active"; Url = TabUrl "#/active" }
+    let ArchivedTab = { IsActive = false; Name = "Archived"; Url = TabUrl "#/archived" }
+    
 
     let makeDeleteButton dispatch entry =
         Bulma.button.button [
@@ -26,7 +27,7 @@ module View =
             prop.onClick (fun _ -> dispatch (RemovedEntry entry.Id))
         ]
 
-    let makeEntryButtons dispatch entry =
+    let makeEntryTableRow dispatch entry =
         let checkboxId = Guid.NewGuid()
         Html.tr [
             Html.td [
@@ -58,6 +59,8 @@ module View =
                     prop.required true
                     prop.placeholder "Add a task"
                     prop.valueOrDefault model.NewEntryDescription
+
+                    prop.onKeyUp (fun event -> if event.key = "Enter" then dispatch AddedEntry)
                     prop.onTextChange (EntryChanged >> dispatch)
                 ]
                 
@@ -70,15 +73,16 @@ module View =
         ]
 
     let makeTodosStateTabs model =
-        let makeTab isActive (name: string) link =
+        let makeTab tabInfo =
             Bulma.tab [
-                match isActive with
+                match tabInfo.IsActive with
                 | true -> tab.isActive
                 | false -> ()
                 prop.children [
                     Html.a [
-                        prop.text name
-                        prop.href link
+                        prop.text tabInfo.Name
+                        let (TabUrl url) = tabInfo.Url
+                        prop.href url
                     ]
                 ]
             ]
@@ -89,21 +93,21 @@ module View =
                 match model.CurrentUrls with
                 | [] ->
                     Html.ul [
-                        makeTab true ALL_TAB_NAME ALL_LINK
-                        makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab { AllTab with IsActive = true }
+                        makeTab ActiveTab
+                        makeTab ArchivedTab
                     ]
                 | [ "active" ] -> 
                     Html.ul [ 
-                        makeTab false ALL_TAB_NAME ALL_LINK
-                        makeTab true ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab AllTab
+                        makeTab { ActiveTab with IsActive = true }
+                        makeTab ArchivedTab
                     ]
                 | [ "archived" ] -> 
                     Html.ul [ 
-                        makeTab false ALL_TAB_NAME ALL_LINK
-                        makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab true ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab AllTab
+                        makeTab ActiveTab
+                        makeTab { ArchivedTab with IsActive = true }
                     ]
                 | _ -> 
                     Html.h1 [ 
@@ -113,12 +117,26 @@ module View =
             ]
         ]
 
+    let githubForkMeRibbon =
+        Html.a [
+            prop.href "https://github.com/modotte/TodoSPA"
+            prop.children [
+                Html.img [
+                    prop.classes [ "attachment-full"; "size-full" ]
+                    prop.alt "Fork me on Github"
+                    prop.src "https://github.blog/wp-content/uploads/2008/12/forkme_left_green_007200.png?resize=149%2C149"
+                ]
+            ]
+        ]
 
     let rootContainer children = 
         Bulma.container [
             container.isFluid
 
-            prop.children [ children ]
+            prop.children [
+                githubForkMeRibbon
+                children 
+            ]
         ]
 
     let headerComponent dispatch model = 
@@ -136,12 +154,13 @@ module View =
                 |> Array.filter (fun entry -> not entry.IsCompleted)
                 |> Array.length
 
-            match todosLeft model.Entries with
+            let todosCount = todosLeft model.Entries
+            match todosCount with
             | 0 -> ()
             | _ ->
                 Html.h3 [
                     prop.style [ style.textAlign.center ]
-                    prop.text $"{todosLeft model.Entries} things left to do"
+                    prop.text $"{todosCount} things left to do"
                 ]
         ]
 
@@ -154,13 +173,12 @@ module View =
                 prop.children [
                     Html.tbody (
                         entries
-                        |> Array.map (fun entry -> makeEntryButtons dispatch entry)
+                        |> Array.map (fun entry -> makeEntryTableRow dispatch entry)
                         |> Array.toList
                     )
                 ]
             ]
         ]
-
 
     let AllView dispatch model =
         Bulma.box [
