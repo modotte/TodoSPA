@@ -11,12 +11,20 @@ open DomainModel
 module View =
     importSideEffects "./styles/global.scss"
 
+    type TabUrl = TabUrl of string
+    type TabInfo = { IsActive: bool; Name: string; Url: TabUrl }
+    
     let [<Literal>] ALL_TAB_NAME = "All"
     let [<Literal>] ACTIVE_TAB_NAME = "Active"
     let [<Literal>] ARCHIVED_TAB_NAME = "Archived"
     let [<Literal>] ALL_LINK = "#/"
     let [<Literal>] ACTIVE_LINK = "#/active"
     let [<Literal>] ARCHIVED_LINK = "#/archived"
+
+    let AllTab = { IsActive = false; Name = "All"; Url = TabUrl "#/"}
+    let ActiveTab = { IsActive = false; Name = "Active"; Url = TabUrl "#/active" }
+    let ArchivedTab = { IsActive = false; Name = "Archived"; Url = TabUrl "#/archived" }
+    
 
     let makeDeleteButton dispatch entry =
         Bulma.button.button [
@@ -72,15 +80,16 @@ module View =
         ]
 
     let makeTodosStateTabs model =
-        let makeTab isActive (name: string) link =
+        let makeTab tabInfo =
             Bulma.tab [
-                match isActive with
+                match tabInfo.IsActive with
                 | true -> tab.isActive
                 | false -> ()
                 prop.children [
                     Html.a [
-                        prop.text name
-                        prop.href link
+                        prop.text tabInfo.Name
+                        let (TabUrl url) = tabInfo.Url
+                        prop.href url
                     ]
                 ]
             ]
@@ -91,21 +100,21 @@ module View =
                 match model.CurrentUrls with
                 | [] ->
                     Html.ul [
-                        makeTab true ALL_TAB_NAME ALL_LINK
-                        makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab { AllTab with IsActive = true }
+                        makeTab ActiveTab
+                        makeTab ArchivedTab
                     ]
                 | [ "active" ] -> 
                     Html.ul [ 
-                        makeTab false ALL_TAB_NAME ALL_LINK
-                        makeTab true ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab false ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab AllTab
+                        makeTab { ActiveTab with IsActive = true }
+                        makeTab ArchivedTab
                     ]
                 | [ "archived" ] -> 
                     Html.ul [ 
-                        makeTab false ALL_TAB_NAME ALL_LINK
-                        makeTab false ACTIVE_TAB_NAME ACTIVE_LINK
-                        makeTab true ARCHIVED_TAB_NAME ARCHIVED_LINK
+                        makeTab AllTab
+                        makeTab ActiveTab
+                        makeTab { ArchivedTab with IsActive = true }
                     ]
                 | _ -> 
                     Html.h1 [ 
