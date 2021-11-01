@@ -108,7 +108,7 @@ module Storage =
     let save (model: Model) =
         localStorage.setItem(key, Encode.Auto.toString(1, model))
 
-    let updateStorage (message: Message) (model: Model) = 
+    let updateStorage update (message: Message) (model: Model) = 
         let setStorage (model: Model) =
             Cmd.OfFunc.attempt save model (string >> Failure)
         
@@ -277,7 +277,8 @@ let ArchivedView dispatch model =
 
 [<ReactComponent>]
 let Router () =
-    let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
+    let (model, dispatch) = 
+        React.useElmish(Storage.load >> init, Storage.updateStorage update, [||])
     React.router [
         router.onUrlChanged (UrlsChanged >> dispatch)
         router.children [
