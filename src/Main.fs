@@ -46,6 +46,11 @@ let init = function
     | Some oldModel -> (oldModel, Cmd.none)
     | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
 
+let withFailure error model =
+    printfn "%A" error
+
+    (model, Cmd.none)    
+
 let withEntryChanged description model =
     ({ model with NewEntryDescription = description }, Cmd.none)
 
@@ -81,7 +86,7 @@ let withUrlChanged segments model = ({ model with CurrentUrls = segments }, Cmd.
 
 let update message model =
     match message with
-    | Failure error -> printfn "%s" error; (model, Cmd.none)
+    | Failure error -> withFailure error model
     | EntryChanged description -> withEntryChanged description model
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
