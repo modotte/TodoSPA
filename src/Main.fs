@@ -40,7 +40,7 @@ type Message =
 | AddedEntry
 | MarkedEntry of TodoId * bool
 | RemovedEntry of TodoId
-| UrlChanged of string list
+| UrlsChanged of string list
 
 let init = function
     | Some oldModel -> (oldModel, Cmd.none)
@@ -91,7 +91,7 @@ let update message model =
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
-    | UrlChanged segments -> withUrlChanged segments model
+    | UrlsChanged segments -> withUrlChanged segments model
 
 module Storage =
     let private key = "modotte-todo-spa-elmish"
@@ -279,7 +279,7 @@ let ArchivedView dispatch model =
 let Router () =
     let (model, dispatch) = React.useElmish(Storage.load >> init, Storage.updateStorage, [||])
     React.router [
-        router.onUrlChanged (UrlChanged >> dispatch)
+        router.onUrlChanged (UrlsChanged >> dispatch)
         router.children [
             match model.CurrentUrls with
             | [] -> AllView dispatch model
