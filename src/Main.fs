@@ -233,7 +233,7 @@ let headerComponent dispatch model =
         makeTodosStateTabs model
     ]
 
-let showEntries dispatch entries =
+let makeEntries dispatch entries =
     Bulma.tableContainer [
         Bulma.table [
             table.isStriped
@@ -253,13 +253,13 @@ let showEntries dispatch entries =
 let AllView dispatch model =
     Bulma.box [
         headerComponent dispatch model
-        showEntries dispatch model.Entries
+        makeEntries dispatch model.Entries
     ] |> rootContainer
 
 let ActiveView dispatch model =
     Bulma.box [
         headerComponent dispatch model
-        showEntries dispatch (
+        makeEntries dispatch (
             model.Entries
             // TODO: Clarify reverse boolean for activeView?
             |> Array.filter (fun entry -> not entry.IsCompleted)
@@ -269,7 +269,7 @@ let ActiveView dispatch model =
 let ArchivedView dispatch model =
     Bulma.box [
         headerComponent dispatch model
-        showEntries dispatch (
+        makeEntries dispatch (
             model.Entries
             |> Array.filter (fun entry -> entry.IsCompleted)
         )
