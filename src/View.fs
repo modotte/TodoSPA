@@ -131,6 +131,18 @@ module View =
 
             makeEntryInputArea dispatch model
             makeTodosStateTabs model
+            let todosLeft entries =
+                entries
+                |> Array.filter (fun entry -> not entry.IsCompleted)
+                |> Array.length
+
+            match todosLeft model.Entries with
+            | 0 -> ()
+            | _ ->
+                Html.h3 [
+                    prop.style [ style.textAlign.center ]
+                    prop.text $"{todosLeft model.Entries} things left to do"
+                ]
         ]
 
     let makeEntries dispatch entries =
