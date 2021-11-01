@@ -82,7 +82,7 @@ let withRemovedEntry id model =
         Entries = Array.filter (fun entry -> entry.Id <> id) model.Entries},
      Cmd.none)
 
-let withUrlChanged segments model = ({ model with CurrentUrls = segments }, Cmd.none)
+let withUrlsChanged segments model = ({ model with CurrentUrls = segments }, Cmd.none)
 
 let update message model =
     match message with
@@ -91,7 +91,7 @@ let update message model =
     | AddedEntry -> withAddedEntry model
     | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
     | RemovedEntry id -> withRemovedEntry id model
-    | UrlsChanged segments -> withUrlChanged segments model
+    | UrlsChanged segments -> withUrlsChanged segments model
 
 module Storage =
     let private key = "modotte-todo-spa-elmish"
