@@ -208,7 +208,7 @@ let makeTodosStateTabs model =
             | _ -> 
                 Html.h1 [ 
                     prop.style [ style.textAlign.center ]
-                    prop.text"Tabs broken"
+                    prop.text "Tabs broken"
                 ]
         ]
     ]
@@ -261,7 +261,7 @@ let ActiveView dispatch model =
         headerComponent dispatch model
         showEntries dispatch (
             model.Entries
-            // TODO: Clarify reverse boolean?
+            // TODO: Clarify reverse boolean for activeView?
             |> Array.filter (fun entry -> not entry.IsCompleted)
         )
     ] |> rootContainer
