@@ -58,6 +58,8 @@ module View =
                     prop.required true
                     prop.placeholder "Add a task"
                     prop.valueOrDefault model.NewEntryDescription
+
+                    prop.onKeyUp (fun event -> if event.key = "Enter" then dispatch AddedEntry)
                     prop.onTextChange (EntryChanged >> dispatch)
                 ]
                 
