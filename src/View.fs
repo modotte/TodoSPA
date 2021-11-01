@@ -154,12 +154,13 @@ module View =
                 |> Array.filter (fun entry -> not entry.IsCompleted)
                 |> Array.length
 
-            match todosLeft model.Entries with
+            let todosCount = todosLeft model.Entries
+            match todosCount with
             | 0 -> ()
             | _ ->
                 Html.h3 [
                     prop.style [ style.textAlign.center ]
-                    prop.text $"{todosLeft model.Entries} things left to do"
+                    prop.text $"{todosCount} things left to do"
                 ]
         ]
 
