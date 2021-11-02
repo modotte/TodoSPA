@@ -14,7 +14,7 @@ module Main =
         | Some oldModel -> (oldModel, Cmd.none)
         | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
 
-    // TODO: Code smell. Put this implement out of the update core.
+    // TODO: Code smell. Put this implementation out of the update core.
     // We don't want any cheap side effects in it.
     // An idea would be to put this in its own logging module,
     // and compose it down to actually reach the logging routine
