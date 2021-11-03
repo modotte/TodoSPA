@@ -75,9 +75,8 @@ module View =
     let makeTodosStateTabs model =
         let makeTab tabInfo =
             Bulma.tab [
-                match tabInfo.IsActive with
-                | true -> tab.isActive
-                | false -> ()
+                if tabInfo.IsActive then
+                    tab.isActive
                 prop.children [
                     Html.a [
                         prop.text tabInfo.Name

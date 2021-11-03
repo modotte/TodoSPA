@@ -35,9 +35,10 @@ module Main =
         }
 
         let resultEntries =
-            match String.IsNullOrEmpty model.NewEntryDescription with
-            | true -> model.Entries
-            | _ -> Array.append [|newEntry|] model.Entries
+            if String.IsNullOrEmpty model.NewEntryDescription then
+                model.Entries
+            else
+                Array.append [|newEntry|] model.Entries
 
         ({ model with Entries = resultEntries; NewEntryDescription = "" }, Cmd.none)
 
