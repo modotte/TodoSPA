@@ -6,6 +6,7 @@ open Elmish
 open Feliz
 open Feliz.Router
 open Feliz.UseElmish
+open Fable.DateFunctions
 
 open DomainModel
 
@@ -14,12 +15,17 @@ module Main =
         | Some oldModel -> (oldModel, Cmd.none)
         | _ -> ({Entries = [||]; NewEntryDescription = ""; CurrentUrls = Router.currentUrl() }, Cmd.none)
 
+    // TODO: Code smell. Put this implementation out of the update core.
+    // We don't want any cheap side effects in it.
+    // An idea would be to put this in its own logging module,
+    // and compose it down to actually reach the logging routine
+    // out of this pure state handler core.
     let withFailure error model =
         printfn "%A" error
 
         (model, Cmd.none)    
 
-    let withEntryChanged description model =
+    let withEntryDescriptionChanged description model =
         ({ model with NewEntryDescription = description }, Cmd.none)
 
     let withAddedEntry model =
@@ -27,23 +33,31 @@ module Main =
             Id = TodoId (Guid.NewGuid())
             Description = model.NewEntryDescription
             IsCompleted = false
+            DateAdded = DateTime.Now
+            DateCompleted = None
         }
 
         let resultEntries =
-            match String.IsNullOrEmpty model.NewEntryDescription with
-            | true -> model.Entries
-            | _ -> Array.append [|newEntry|] model.Entries
+            if String.IsNullOrEmpty model.NewEntryDescription then
+                model.Entries
+            else
+                Array.append [|newEntry|] model.Entries
 
         ({ model with Entries = resultEntries; NewEntryDescription = "" }, Cmd.none)
 
     let withMarkedEntry id isCompleted model =
         let updateEntry entry =
             if entry.Id = id then
-                { entry with IsCompleted = not isCompleted }
+                { entry with 
+                    IsCompleted = not isCompleted
+                    DateCompleted = if not isCompleted then Some DateTime.Now else None
+                }
             else
                 entry
 
-        ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
+        ({ model with 
+            Entries = Array.map updateEntry model.Entries
+         }, Cmd.none)
 
     let withRemovedEntry id model =
         ({ model with
@@ -55,7 +69,7 @@ module Main =
     let update message model =
         match message with
         | Failure error -> withFailure error model
-        | EntryChanged description -> withEntryChanged description model
+        | EntryChanged description -> withEntryDescriptionChanged description model
         | AddedEntry -> withAddedEntry model
         | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
         | RemovedEntry id -> withRemovedEntry id model

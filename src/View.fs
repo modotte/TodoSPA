@@ -5,6 +5,7 @@ open System
 open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
+open Fable.DateFunctions
 
 open DomainModel
 
@@ -31,6 +32,15 @@ module View =
         let checkboxId = Guid.NewGuid()
         Html.tr [
             Html.td [
+
+                let dateFormat = "dd/MM/yyyy"
+                match entry.DateCompleted with
+                | None -> 
+                    Html.em [ prop.text ("Added at: " + entry.DateAdded.Format(dateFormat)) ]
+                | Some date ->
+                    Html.em [ prop.text ("Completed at: " + date.Format(dateFormat))]
+
+                Html.br []
                 Checkradio.checkbox [
                     color.isPrimary
                     prop.id (string checkboxId)
@@ -75,9 +85,8 @@ module View =
     let makeTodosStateTabs model =
         let makeTab tabInfo =
             Bulma.tab [
-                match tabInfo.IsActive with
-                | true -> tab.isActive
-                | false -> ()
+                if tabInfo.IsActive then
+                    tab.isActive
                 prop.children [
                     Html.a [
                         prop.text tabInfo.Name
@@ -111,7 +120,6 @@ module View =
                     ]
                 | _ -> 
                     Html.h1 [ 
-                        prop.style [ style.textAlign.center ]
                         prop.text "Tabs broken"
                     ]
             ]
@@ -142,9 +150,8 @@ module View =
     let headerComponent dispatch model = 
         Html.div [
             Bulma.title [
-                prop.style [ style.textAlign.center ]
                 title.is2
-                prop.text "TodoSPA Demo"
+                prop.text "TodoSPA"
             ]
 
             makeEntryInputArea dispatch model
@@ -159,7 +166,6 @@ module View =
             | 0 -> ()
             | _ ->
                 Html.h3 [
-                    prop.style [ style.textAlign.center ]
                     prop.text $"{todosCount} things left to do"
                 ]
         ]
