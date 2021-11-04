@@ -32,7 +32,14 @@ module View =
         let checkboxId = Guid.NewGuid()
         Html.tr [
             Html.td [
-                Html.em [ prop.text ("Added at: " + entry.DateAdded.Format("dd/MM/yyyy")) ]
+
+                let dateFormat = "dd/MM/yyyy"
+                match entry.DateCompleted with
+                | None -> 
+                    Html.em [ prop.text ("Added at: " + entry.DateAdded.Format(dateFormat)) ]
+                | Some date ->
+                    Html.em [ prop.text ("Completed at: " + date.Format(dateFormat)) ]
+
                 Html.br []
                 Checkradio.checkbox [
                     color.isPrimary

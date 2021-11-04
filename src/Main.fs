@@ -34,6 +34,7 @@ module Main =
             Description = model.NewEntryDescription
             IsCompleted = false
             DateAdded = DateTime.Now
+            DateCompleted = None
         }
 
         let resultEntries =
@@ -47,11 +48,16 @@ module Main =
     let withMarkedEntry id isCompleted model =
         let updateEntry entry =
             if entry.Id = id then
-                { entry with IsCompleted = not isCompleted }
+                { entry with 
+                    IsCompleted = not isCompleted
+                    DateCompleted = Some DateTime.Now
+                }
             else
                 entry
 
-        ({ model with Entries = Array.map updateEntry model.Entries }, Cmd.none)
+        ({ model with 
+            Entries = Array.map updateEntry model.Entries
+         }, Cmd.none)
 
     let withRemovedEntry id model =
         ({ model with
