@@ -120,7 +120,6 @@ module View =
                     ]
                 | _ -> 
                     Html.h1 [ 
-                        prop.style [ style.textAlign.center ]
                         prop.text "Tabs broken"
                     ]
             ]
@@ -151,9 +150,8 @@ module View =
     let headerComponent dispatch model = 
         Html.div [
             Bulma.title [
-                prop.style [ style.textAlign.center ]
                 title.is2
-                prop.text "TodoSPA Demo"
+                prop.text "TodoSPA"
             ]
 
             makeEntryInputArea dispatch model
@@ -168,7 +166,6 @@ module View =
             | 0 -> ()
             | _ ->
                 Html.h3 [
-                    prop.style [ style.textAlign.center ]
                     prop.text $"{todosCount} things left to do"
                 ]
         ]
