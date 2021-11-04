@@ -24,7 +24,7 @@ module Main =
 
         (model, Cmd.none)    
 
-    let withEntryChanged description model =
+    let withEntryDescriptionChanged description model =
         ({ model with NewEntryDescription = description }, Cmd.none)
 
     let withAddedEntry model =
@@ -61,7 +61,7 @@ module Main =
     let update message model =
         match message with
         | Failure error -> withFailure error model
-        | EntryChanged description -> withEntryChanged description model
+        | EntryChanged description -> withEntryDescriptionChanged description model
         | AddedEntry -> withAddedEntry model
         | MarkedEntry (id, isCompleted) -> withMarkedEntry id isCompleted model
         | RemovedEntry id -> withRemovedEntry id model
