@@ -50,7 +50,7 @@ module Main =
             if entry.Id = id then
                 { entry with 
                     IsCompleted = not isCompleted
-                    DateCompleted = Some DateTime.Now
+                    DateCompleted = if not isCompleted then Some DateTime.Now else None
                 }
             else
                 entry

@@ -38,7 +38,7 @@ module View =
                 | None -> 
                     Html.em [ prop.text ("Added at: " + entry.DateAdded.Format(dateFormat)) ]
                 | Some date ->
-                    Html.em [ prop.text ("Completed at: " + date.Format(dateFormat)) ]
+                    Html.em [ prop.text ("Completed at: " + date.Format(dateFormat))]
 
                 Html.br []
                 Checkradio.checkbox [
