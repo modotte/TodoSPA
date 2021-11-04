@@ -5,6 +5,7 @@ open System
 open Feliz
 open Feliz.Bulma
 open Fable.Core.JsInterop
+open Fable.DateFunctions
 
 open DomainModel
 
@@ -31,6 +32,8 @@ module View =
         let checkboxId = Guid.NewGuid()
         Html.tr [
             Html.td [
+                Html.em [ prop.text ("Added at: " + entry.DateAdded.Format("dd/MM/yyyy")) ]
+                Html.br []
                 Checkradio.checkbox [
                     color.isPrimary
                     prop.id (string checkboxId)

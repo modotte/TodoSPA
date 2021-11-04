@@ -9,6 +9,7 @@ module DomainModel =
         Id: TodoId
         Description: string
         IsCompleted: bool
+        DateAdded: DateTime
     }
 
     type Model = {

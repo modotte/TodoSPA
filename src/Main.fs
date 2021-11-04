@@ -6,6 +6,7 @@ open Elmish
 open Feliz
 open Feliz.Router
 open Feliz.UseElmish
+open Fable.DateFunctions
 
 open DomainModel
 
@@ -32,6 +33,7 @@ module Main =
             Id = TodoId (Guid.NewGuid())
             Description = model.NewEntryDescription
             IsCompleted = false
+            DateAdded = DateTime.Now
         }
 
         let resultEntries =
